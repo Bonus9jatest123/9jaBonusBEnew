@@ -1,0 +1,26 @@
+.bets-list {
+  font-size: 14px;
+  .list__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 5%;
+
+    @media screen and (min-width: 768px) {
+      padding: 10px 15%;
+    }
+
+    .header__x {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+      color: #101828;
+      gap: 4px;
+
+      span {
+        width: 55px;
+        text-align: center;
+      }
+    }
+  }
+}

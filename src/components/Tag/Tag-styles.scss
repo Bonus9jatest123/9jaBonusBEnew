@@ -1,0 +1,23 @@
+.tag {
+  border-radius: 4px;
+  background: #fee4e2;
+  padding: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  height: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  &.--hot {
+    background: #fee4e2;
+    color: #f04438;
+  }
+
+  &.--best {
+    background: #e6fce7;
+    color: #17a254;
+  }
+}

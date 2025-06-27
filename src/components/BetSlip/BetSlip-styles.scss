@@ -1,0 +1,35 @@
+.betslip {
+  .slip__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 5%;
+    gap: 5%;
+    font-size: 14px;
+    border-bottom: 1px solid #eaecf0;
+    align-items: flex-start;
+
+    @media screen and (min-width: 768px) {
+      padding: 12px 15%;
+    }
+
+    &:nth-child(odd) {
+      background: #f9fafb;
+    }
+
+    .item__bin {
+      cursor: pointer;
+    }
+
+    .item__details {
+      flex: 1;
+      .details__heading {
+        margin-bottom: 3px;
+      }
+
+      .details__info {
+        color: #667085;
+        font-size: 12px;
+      }
+    }
+  }
+}

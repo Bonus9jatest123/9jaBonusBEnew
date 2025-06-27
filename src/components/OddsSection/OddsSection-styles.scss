@@ -1,0 +1,50 @@
+.odds-section {
+  .section__header {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    position: relative;
+    height: 47px;
+
+    @media screen and (min-width: 768px) {
+      padding: 0 15%;
+    }
+
+    .odds-switch {
+      display: flex;
+      .switch__item {
+        padding: 10px 16px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: center;
+        background: #fff;
+        color: #17a254;
+        cursor: pointer;
+        font-weight: 500;
+
+        &.--active {
+          font-weight: 700;
+          border-bottom: 3px solid #17a254;
+        }
+        .btn-counter {
+          background: #17a254;
+          color: #fff;
+          margin-left: 8px;
+        }
+      }
+    }
+
+    .header__back-btn {
+      position: absolute;
+      cursor: pointer;
+      width: 25px;
+      right: 10%;
+      @media screen and (min-width: 768px) {
+        right: 17%;
+      }
+    }
+  }
+}

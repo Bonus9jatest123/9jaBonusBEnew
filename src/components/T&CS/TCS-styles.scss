@@ -1,0 +1,17 @@
+.tcs-container {
+  padding-left: 20px;
+  padding-right: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 25px;
+  max-height: 250px;
+  overflow: auto;
+  width: 100%;
+  max-height: 208px;
+
+  @media only screen and (max-width: 600px) {
+    max-height: 235px;
+    padding: 0 5%;
+    margin: 0 auto;
+  }
+}

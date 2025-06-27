@@ -1,0 +1,20 @@
+.bets-section {
+  .filters {
+    .filters__competition {
+      position: relative;
+      display: flex;
+      gap: 5%;
+      border-bottom: 1px solid #eaecf0;
+      background: #f9fafb;
+      padding: 10px 5%;
+
+      @media screen and (min-width: 768px) {
+        padding: 10px 15%;
+      }
+
+      .competition__game {
+        flex: 1;
+      }
+    }
+  }
+}

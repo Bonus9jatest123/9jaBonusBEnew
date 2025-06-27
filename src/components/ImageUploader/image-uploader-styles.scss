@@ -1,0 +1,29 @@
+.file-input-button {
+  * {
+    box-sizing: border-box;
+  }
+  box-sizing: border-box;
+  display: block;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  border-radius: 3px;
+  height: 65px;
+  width: 65px;
+  font-size: 12px;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  input {
+    display: none;
+  }
+
+  .image {
+    height: inherit;
+    width: inherit;
+    border-radius: inherit;
+  }
+}

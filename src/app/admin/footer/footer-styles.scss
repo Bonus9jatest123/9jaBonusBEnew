@@ -1,0 +1,31 @@
+.footer-options {
+  margin-top: 50px;
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px;
+    border-bottom: 1px solid #dbdbdb;
+  }
+
+  .footer-cell {
+    width: 120px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .options__header {
+    font-weight: 600;
+  }
+
+  .options__body {
+    .body__option {
+      .edit-icon {
+        width: 15px;
+        cursor: pointer;
+      }
+    }
+  }
+}

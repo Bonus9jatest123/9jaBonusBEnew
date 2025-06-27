@@ -1,0 +1,6 @@
+# Node artifact files
+
+.env.local
+.env.production
+node_modules
+.next

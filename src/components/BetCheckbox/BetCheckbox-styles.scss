@@ -1,0 +1,19 @@
+.bet-radio {
+  cursor: pointer;
+  input {
+    display: none;
+  }
+  width: 55px;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-weight: 500;
+  background: #eaecf0;
+  color: #344054;
+  margin: 0;
+  text-align: center;
+
+  &.--checked {
+    background: #17a254;
+    color: #fff;
+  }
+}

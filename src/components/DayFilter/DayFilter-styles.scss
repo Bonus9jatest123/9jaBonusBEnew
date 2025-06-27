@@ -1,0 +1,56 @@
+.day-filter {
+  padding: 12px 5%;
+  background: #101828;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5%;
+
+  @media screen and (min-width: 768px) {
+    padding: 12px 15%;
+  }
+  .filter__live {
+    border-radius: 4px;
+    background: #f04438;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 5px;
+    width: 57px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .filter__days {
+    display: flex;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    justify-content: space-between;
+    flex: 1;
+
+    .days__day {
+      cursor: pointer;
+      .day__name {
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+      .day__date {
+        font-size: 10px;
+        color: #98a2b3;
+        font-weight: 400;
+      }
+
+      &.--selected {
+        .day__name {
+          color: #17a254;
+        }
+        .day__date {
+          color: #fff;
+        }
+      }
+    }
+  }
+}

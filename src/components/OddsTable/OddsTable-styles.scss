@@ -1,0 +1,74 @@
+.odds-table {
+  .table__column {
+    width: 95px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .column__bookie-icon {
+      width: 58px;
+      height: 20px;
+      border-radius: 2px;
+      object-fit: cover;
+    }
+  }
+  .table__header {
+    display: flex;
+    justify-content: space-between;
+    border: #f2f4f7;
+    background: #eaecf0;
+    padding: 12px 3%;
+    font-size: 14px;
+    color: #667085;
+
+    @media screen and (min-width: 768px) {
+      padding: 12px 15%;
+    }
+  }
+
+  .table__body {
+    padding-bottom: 20px;
+    .body__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 3%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #f2f4f7;
+      cursor: pointer;
+
+      @media screen and (min-width: 768px) {
+        padding: 8px 15%;
+      }
+
+      &:nth-child(odd) {
+        background: #f9fafb;
+      }
+
+      &.--active {
+        background: #e6fce7;
+        color: #17a254;
+        font-weight: 600;
+        .row__odds {
+          background: #17a254;
+          color: #fff;
+        }
+      }
+
+      .row__odds {
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaecf0;
+        color: #344054;
+        border-radius: 4px;
+        width: 74px;
+        font-weight: 500;
+      }
+    }
+  }
+}

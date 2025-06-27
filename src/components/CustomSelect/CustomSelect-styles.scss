@@ -1,0 +1,12 @@
+.select-element {
+  * {
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  .element__selector {
+    flex: 1;
+  }
+}
