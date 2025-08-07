@@ -9,9 +9,9 @@ import { withCors } from '@/middleware/cors';
 
 
 export default withCors(async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // if (req.method !== 'POST') {
-  //   return res.status(405).json({ status: false, message: 'Method Not Allowed' });
-  // }
+  if (req.method !== 'POST') {
+    return res.status(405).json({ status: false, message: 'Method Not Allowed' });
+  }
 
   console.log('req:- '+JSON.stringify(req));
 
