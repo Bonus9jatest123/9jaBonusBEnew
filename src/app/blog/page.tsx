@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import Footer from '@/components/Footer/index';
 import { API_ENDPOINT } from '@/lib/constants';
 import { findItemByKey } from '@/lib/utils';
+import { getCookie } from '@/lib/cookies';
+import HandleError from '@/handleError';
 export interface BlogPost {
   title: string;
   pubDate: string;
@@ -28,7 +30,9 @@ const Blog = () => {
 
   useEffect(() => {
     axios
-      .get(`${API_ENDPOINT}/footer/footers`)
+      .get(`${API_ENDPOINT}/footer/footers`, {
+        headers: {  ['x-auth-token']: getCookie('token') },
+      })
       .then((response: { data: any }) => {
         const footers = response?.data;
         //  dispatch(setOdds(odds));
@@ -36,6 +40,8 @@ const Blog = () => {
       })
       .catch((error: any) => {
         console.log('Odds error: ', error);
+         toast.error(error?.response?.data?.message || 'Something went wrong');
+        // HandleError(error);
       });
     const blogsStr = localStorage.getItem('blogs');
     let blogs: BlogPost[] = [];
@@ -57,6 +63,7 @@ const Blog = () => {
         })
         .catch(() => {
           toast.error('Something went wrong');
+          
         })
         .finally(() => setLoading(false));
     }

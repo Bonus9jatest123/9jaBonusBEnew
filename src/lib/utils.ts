@@ -162,7 +162,10 @@ export function formatDateForOddssRow(dateString: string) {
 
 export function getLocalDate(dateString: string = '') {
   if (dateString) {
-    return moment(dateString).format('YYYY-MM-DDTHH:mm');
+    return moment(dateString).format('YYYY-MM-DD HH:mm');
+  }
+  else{
+    return moment().format('YYYY-MM-DD HH:mm');
   }
 }
 

@@ -9,11 +9,15 @@ import { getCookie } from '@/lib/cookies';
 import 'react-quill/dist/quill.snow.css';
 
 import dynamic from 'next/dynamic';
+import { toast } from 'react-toastify';
+import HandleError from '@/handleError';
 
-const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+const token = getCookie('token');
 
 const AdminFooterTable = (props: any) => {
   const { setShowFormId } = props;
+
+  
  
   const headers = {
     'x-auth-token':token
@@ -30,6 +34,9 @@ const AdminFooterTable = (props: any) => {
       })
       .catch((error: any) => {
         console.log('Odds error: ', error);
+     
+        HandleError(error);
+             toast.error(error?.response?.data?.message || 'Something went wrong');
       });
   };
 

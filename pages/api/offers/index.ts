@@ -30,7 +30,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
         await connectDb();
 
         // Middleware: JWT Authorization (for POST and PUT)
-        if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
+        if (req.method === 'POST' || req.method === 'PUT' || req.method === 'GET') {
             await new Promise((resolve, reject) =>
                 authorize(req, res, (result: unknown) => {
                     if (result instanceof Error) return reject(result);
@@ -39,12 +39,13 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
             );
         }
 
+
         // Multer: Only for POST
         if (req.method === 'POST') {
             try {
-                 await runMiddleware(req, res, upload.fields([{ name: 'logo' }, { name: 'infoImage' }]));
-             } catch (error: any) {
-              return res.status(405).json({ message: error.message });
+                await runMiddleware(req, res, upload.fields([{ name: 'logo' }, { name: 'infoImage' }]));
+            } catch (error: any) {
+                return res.status(405).json({ status: false, message: error.message });
             }
         }
 
@@ -55,11 +56,10 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 const pageNumberRaw = Array.isArray(req.query.pageNumber) ? req.query.pageNumber[0] : req.query.pageNumber;
                 const pageSizeRaw = Array.isArray(req.query.pageSize) ? req.query.pageSize[0] : req.query.pageSize;
 
-                if (error) return res.status(400).send(error.details[0].message);
-
+                if (error)
+                    return res.status(400).json({ status: false, message: error.details[0].message });
                 const page = parseInt(pageNumberRaw || '1', 10);
                 const limit = parseInt(pageSizeRaw || '10', 10);
-
                 const options = req.query.disabled ? {} : { enabled: true };
 
                 const offers = await Offer.find(options)
@@ -69,31 +69,31 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 
                 const totalOffers = await Offer.countDocuments();
                 const totalPages = Math.ceil(totalOffers / limit);
-
-               return res.send({
-                    offers,
+                return res.status(200).json({
+                    status: true, offers,
                     currentPage: page,
                     totalPages,
                     totalOffers,
                 });
             }
             catch (err: any) {
-
+              console.error('Error updating footer:', err);
+                return res.status(500).json({ status: false, message: err.errors?.name?.message });
             }
         }
 
         if (req.method === 'POST') {
             try {
                 // Run multer upload middleware
-                 const { error } = validateOffer(req.body);
-                if (error) return res.status(400).json({ message: error.details[0].message });
+                const { error } = validateOffer(req.body);
+                if (error) return res.status(400).json({status:false, message: error.details[0].message });
 
                 let images: Record<string, any> = {};
 
                 const files = (req as any).files || {};
                 const fileValidation = validateFileInput(files);
                 if (fileValidation?.error) {
-                    return res.status(400).json({ message: fileValidation.error.details[0].message });
+                    return res.status(400).json({status:false, message: fileValidation.error.details[0].message });
                 }
 
                 for (const fileKey in files) {
@@ -103,7 +103,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                     if (imgFile) {
                         const imageData = await saveImage(imgFile, null, isLogo);
                         if (imageData?.error) {
-                            return res.status(500).json({ message: 'Image upload failed' });
+                            return res.status(500).json({status:false, message: 'Image upload failed' });
                         }
                         images[fileKey] = imageData;
                     }
@@ -117,11 +117,12 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 
                 const offer = new Offer(offerData);
                 await offer.save();
-
-              return  res.status(201).json(offer);
+                 
+                return res.status(201).json({ status: true,offer });
+                
             } catch (error: any) {
                 console.error('Error saving offer:', error);
-                res.status(500).json({ message: error.message || 'Server error' });
+               return res.status(500).json({status:false, message: error.message || 'Server error' });
             }
 
         }

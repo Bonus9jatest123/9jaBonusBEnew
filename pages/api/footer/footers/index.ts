@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Footer } from '@/models/footer';
 import { connectDb } from '@/lib/startup/connectDb';
 import { withCors } from '@/middleware/cors';
+import { authorize } from '@/middleware/authorize';
+
 
 // Disable Next.js default body parser (for multer)
 export const config = {
@@ -13,14 +15,20 @@ export const config = {
 export default withCors(async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         await connectDb();
+        // await new Promise((resolve, reject) =>
+        //     authorize(req, res, (result: unknown) => {
+        //         if (result instanceof Error) return reject(result);
+        //         return resolve(result);
+        //     })
+        // );
         // --- Route Logic ---
         if (req.method === 'GET') {
             try {
                 const footers = await Footer.find().populate('followUs').populate('pageLinks').populate('accordians').populate('otherText');
                 console.log(footers);
-               return res.send(footers);
+                res.send(footers);
             } catch (err: any) {
-               return res.status(500).send({ error: err.message });
+                res.status(500).send({ error: err.message });
             }
         }
         return res.status(405).json({ error: `Method '${req.method}' not allowed` });

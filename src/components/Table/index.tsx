@@ -8,6 +8,7 @@ import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
 import { toast } from 'react-toastify';
 import { getCookie } from '@/lib/cookies';
+import HandleError from '@/handleError';
 
 interface Props {
   offers: Offer[];
@@ -26,7 +27,7 @@ const Table = (props: Props) => {
 
   const header = ['Rating', 'Bookie', 'Status', 'PromoInfo', 'Logo', 'Review', 'Key info', 'T&Cs', 'Link', 'Actions'];
 
-  const token = getCookie('token') && JSON.parse(getCookie('token')!);
+  const token = getCookie('token')  ;
 
   const updateOrder = (id: string, order: number) => {
     const headers = {
@@ -43,7 +44,8 @@ const Table = (props: Props) => {
       })
       .catch((error: any) => {
         console.error('Error submitting form:', error);
-        toast.error('Something went wrong');
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
         setSaving(false);
       });
   };

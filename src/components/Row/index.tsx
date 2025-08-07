@@ -6,6 +6,7 @@ import axios from 'axios';
 import { getCookie } from '@/lib/cookies';
 import { API_ENDPOINT } from '@/lib/constants';
 import ConfirmationPopup from '../ConfirmationPopup';
+import HandleError from '@/handleError';
 
 interface Props {
   data: Offer;
@@ -20,7 +21,7 @@ const Row = (props: Props) => {
   const { data, dragHandleProps, setSelectedId, handleEdit, selectedId, items, setItems } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+  const token = getCookie('token') ;
 
   const resetStates = () => {
     setIsOpen(false);
@@ -45,9 +46,9 @@ const Row = (props: Props) => {
         resetStates();
       })
       .catch((error: any) => {
-        console.error('Error submitting form:', error);
-        toast.error('Something went wrong');
-        resetStates();
+          toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
+         resetStates();
       });
   };
 

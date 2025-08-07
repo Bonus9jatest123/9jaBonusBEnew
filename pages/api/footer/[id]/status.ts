@@ -15,12 +15,12 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
         await connectDb();
 
         // Middleware: JWT Authorization (for POST and PUT)
-        await new Promise((resolve, reject) =>
-            authorize(req, res, (result: unknown) => {
-                if (result instanceof Error) return reject(result);
-                return resolve(result);
-            })
-        );
+        // await new Promise((resolve, reject) =>
+        //     authorize(req, res, (result: unknown) => {
+        //         if (result instanceof Error) return reject(result);
+        //         return resolve(result);
+        //     })
+        // );
 
 
         if (req.method == 'PUT') {
@@ -52,9 +52,9 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 }
                 footer.status = status;
                 await footer.save();
-             return   res.send(footer);
+                res.send(footer);
             } catch (err: any) {
-              return  res.status(500).send({ error: err.message });
+                res.status(500).send({ error: err.message });
             }
         }
         return res.status(405).json({ error: `Method '${req.method}' not allowed` });

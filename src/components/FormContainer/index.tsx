@@ -11,6 +11,7 @@ import { Offer } from '@/components/TabCards/index';
 import ImageUploader from '@/components/ImageUploader';
 import { API_ENDPOINT } from '@/lib/constants';
 import SelectionsTable from '../SelectionsTable';
+import HandleError from '@/handleError';
 const ReactQuill = dynamic(() => import('react-quill'), {
   ssr: false
 });
@@ -75,8 +76,7 @@ const FormContainer = (props: Props) => {
   });
 
   const [active, setActive] = useState('key');
-  const token = getCookie('token') && JSON.parse(getCookie('token') as any);
-
+  const token = getCookie('token');
   const resetStates = () => {
     setIsOpen(false);
     setSelectedId('');
@@ -90,6 +90,7 @@ const FormContainer = (props: Props) => {
       updateOffer(values);
     }
   });
+
 
   const updateOffer = (values: FormData) => {
     const formData = new FormData();
@@ -107,6 +108,7 @@ const FormContainer = (props: Props) => {
     }
 
     const editId = selectedId || '';
+
     const changedValues = {};
     if (editId) {
       if (initialValues.enabled !== values.enabled) formData.append('enabled', `${values.enabled}`);
@@ -127,23 +129,28 @@ const FormContainer = (props: Props) => {
         setLoading(true);
         axios
           .put(`${API_ENDPOINT}/offers/${editId}`, formData, { headers })
-          .then((response: { data: Offer }) => {
-            const { data } = response;
-            resetForm();
-            const offersCopy = [...offers];
-            const index = offersCopy?.findIndex((item) => item?._id === editId);
+          .then((response: any) => {
+            if (response?.data?.status) {
+              const data = response?.data?.updatedOffer;
+              resetForm();
+              const offersCopy = [...offers];
+              const index = offersCopy?.findIndex((item) => item?._id === editId);
 
-            if (index !== -1) {
-              offersCopy[index] = { ...offersCopy[index], ...data };
-              setOffers(offersCopy);
-              toast.success('Updated');
+              if (index !== -1) {
+                offersCopy[index] = { ...offersCopy[index], ...data };
+                setOffers(offersCopy);
+                toast.success('Updated');
+              }
+              resetStates();
+            } else {
+              toast.error(response?.data?.message)
             }
-            resetStates();
           })
           .catch((error: any) => {
             console.error('Error submitting form:', error);
             toast.error('Something went wrong');
             resetStates();
+            HandleError(error)
           });
       } else resetStates();
     } else {
@@ -156,17 +163,23 @@ const FormContainer = (props: Props) => {
       setLoading(true);
       axios
         .post(`${API_ENDPOINT}/offers/`, formData, { headers })
-        .then((response: { data: Offer }) => {
-          resetForm();
-          toast.success('Added');
-          const offersCopy = [...offers];
-          offersCopy.push(response.data);
-          setOffers(offersCopy);
-          resetStates();
+        .then((response: any) => {
+           if (response?.data?.status) {
+            resetForm();
+            toast.success('Added');
+            const offersCopy = [...offers];
+            offersCopy.push(response.data?.offer);
+            setOffers(offersCopy);
+            resetStates();
+          }else{
+            toast.error(response?.data?.message)
+          }
+
         })
         .catch((error: any) => {
           console.error('Error submitting form:', error);
-          toast.error('Something went wrong');
+          toast.error(error?.response?.data?.message || 'Something went wrong');
+          HandleError(error);
           resetStates();
         });
     }

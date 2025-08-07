@@ -12,3 +12,17 @@ export const getCookie = (key: string): string | undefined => {
 export const removeCookie = (key: string): void => {
   cookie.remove(key);
 };
+
+
+export const setUserCookie = (key: string, value: string, time: number = 1): void => {
+  cookie.set(key, value, { expires: time });
+};
+
+export const getUserCookie = (key: string): string | undefined => {
+  const value = cookie.get(key);
+  return value;
+};
+
+export const removeUserCookie = (key: string): void => {
+  cookie.remove(key);
+};

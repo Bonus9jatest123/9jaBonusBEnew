@@ -11,6 +11,7 @@ import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
 import { getCookie } from '@/lib/cookies';
 import { toast } from 'react-toastify';
+import HandleError from '@/handleError';
 
 interface OddsRowProps {
   dragHandleProps: DraggableProps;
@@ -19,7 +20,7 @@ interface OddsRowProps {
   setSelectedId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+const token = getCookie('token');
 
 const headers = {
   'x-auth-token': token
@@ -45,8 +46,9 @@ const OddsRow = ({ dragHandleProps, data }: OddsRowProps) => {
       dispatch(setOdds([...filteredOdds]));
       localStorage.clear();
       toast.success('Deleted');
-    } catch (error) {
-      toast.error('Something went wrong');
+    } catch (error:any) {
+       toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
       console.log('Muneeb Odds error: ', error);
     } finally {
       setSaving(false);

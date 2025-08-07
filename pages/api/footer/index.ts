@@ -29,10 +29,8 @@ const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: Function) 
 export default withCors(async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         await connectDb();
-
-        // Middleware: JWT Authorization (for POST and PUT)
-        if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
-            const authResult = await new Promise((resolve, reject) =>
+        if (req.method === 'POST' || req.method === 'PUT' ) {
+            await new Promise((resolve, reject) =>
                 authorize(req, res, (result: unknown) => {
                     if (result instanceof Error) return reject(result);
                     return resolve(result);
@@ -40,9 +38,10 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
             );
         }
 
+
         // // Multer: Only for POST
         // if (req.method === 'POST') {
-           
+
         // }
 
         // --- Route Logic ---
@@ -52,10 +51,10 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
         }
 
         if (req.method === 'POST') {
-             await runMiddleware(req, res, upload.any());
+            await runMiddleware(req, res, upload.any());
             const { error } = validateFooter(req.body);
             if (error) return res.status(400).json({ error: error.details[0].message });
-            
+
             let { followUs, pageLinks, accordians, otherText, ...footerData } = req.body;
             const processItems = async (items: any, model: any, fieldName: any) => {
                 if (items && items.length > 0) {
@@ -115,12 +114,13 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 
             // TODO: Save footer
             return res.status(201).json(footer);
+            
         }
 
-        return res.status(405).json({ error: `Method '${req.method}' not allowed` });
+        return res.status(405).json({ staus:false, message: `Method '${req.method}' not allowed` });
     } catch (error: any) {
         console.error('API Error:', error);
-        return res.status(500).json({ error: 'Internal server error', details: error.message });
+        return res.status(500).json({status:false, message: 'Internal server error', details: error.message });
     }
 })
 

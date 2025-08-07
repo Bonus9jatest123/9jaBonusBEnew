@@ -33,7 +33,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
         await connectDb();
 
         // Middleware: JWT Authorization (for POST and PUT)
-        if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
+        if (req.method === 'POST' || req.method === 'PUT') {
             await new Promise((resolve, reject) =>
                 authorize(req, res, (result: unknown) => {
                     if (result instanceof Error) return reject(result);
@@ -64,7 +64,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 if (!offer)
                     return res.status(404).send('The offer with the given ID does not exist.');
 
-                res.send(offer);
+              return  res.send(offer);
             }
             catch (err: any) {
                 console.error('Error saving offer:', err);
@@ -76,19 +76,19 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
             try {
                 const offerId = (req.query.id as string) || '';
                 if (!offerId) {
-                    return res.status(404).json({ message: 'Offer Id not found' });
+                    return res.status(404).json({status:false, message: 'Offer Id not found' });
                 }
                 // Validate
                 const { error } = validateOffer({ isEdit: true, ...req.body });
-                if (error) return res.status(400).json({ message: error.details[0].message });
+                if (error) return res.status(400).json({status:false, message: error.details[0].message });
                 const offer = await Offer.findById(offerId);
-                if (!offer) return res.status(404).json({ message: 'Offer not found' });
+                if (!offer) return res.status(404).json({status:false, message: 'Offer not found' });
                 // Handle images
                 let images: any = {};
                 const files = (req as any).files as Record<string, Express.Multer.File[]>;
                 if (files) {
                     const { error: fileError } = validateFileInput(files);
-                    if (fileError) return res.status(400).json({ message: fileError.details[0].message });
+                    if (fileError) return res.status(400).json({status:false, message: fileError.details[0].message });
 
                     for (const file in files) {
                         const imgFile = files[file]?.[0];
@@ -96,7 +96,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                         if (imgFile) {
                             const imageData = await saveImage(imgFile, (offer as any)[file]?.cloudinaryId, isLogo);
                             if (imageData?.error) {
-                                return res.status(500).json({ message: 'Image processing failed' });
+                                return res.status(500).json({status:false, message: 'Image processing failed' });
                             }
                             images[file] = imageData;
                         }
@@ -110,10 +110,10 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 const updatedOffer = await Offer.findByIdAndUpdate(offer._id, offerData, {
                     new: true,
                 });
-                return res.status(200).json(updatedOffer);
+                return res.status(200).json({status:true, message: 'Update successfully',updatedOffer });
             } catch (error: any) {
                 console.error('Error saving offer:', error);
-                res.status(500).json({ message: error.message || 'Server error' });
+                res.status(500).json({ sttaus: false , message: error.message || 'Server error' });
             }
         } if (req.method == 'DELETE') {
             try {

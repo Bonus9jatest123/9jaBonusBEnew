@@ -2,26 +2,25 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Odd, validateOdd } from '@/models/odd';
 import { connectDb } from '@/lib/startup/connectDb';
 import { authorize } from '@/middleware/authorize';
-import { findBestOdds,validatePagination } from '@/lib/backend.utils';
-
+import { findBestOdds, validatePagination } from '@/lib/backend.utils';
 import { withCors } from '@/middleware/cors';
 
- 
- 
+
+
 // --- API Handler ---
 export default withCors(async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         await connectDb();
 
+
         // Middleware: JWT Authorization (for POST and PUT)
-        if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
-            const authResult = await new Promise((resolve, reject) =>
-                authorize(req, res, (result: unknown) => {
-                    if (result instanceof Error) return reject(result);
-                    return resolve(result);
-                })
-            );
-        }
+        if (req.method === 'POST' || req.method === 'PUT' || req.method === 'GET') {
+        await new Promise((resolve, reject) =>
+            authorize(req, res, (result: unknown) => {
+                if (result instanceof Error) return reject(result);
+                return resolve(result);
+            })
+        )}
         // --- Route Logic ---
         if (req.method === 'GET') {
             try {
@@ -33,10 +32,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 
                 const currentPage = parseInt(pageNumber || '1', 10);
                 const limit = parseInt(pageSize || '10', 10);
-
-
                 const options = req.query.disabled ? {} : { suspendAll: false };
-
                 const odds = await Odd.find(options)
                     .sort('order')
                     .limit(limit)
@@ -44,7 +40,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 const totalOdds = await Odd.countDocuments();
                 const totalPages = Math.ceil(totalOdds / limit);
 
-               return res.send({
+                return res.send({
                     odds,
                     currentPage,
                     totalPages,
@@ -52,34 +48,28 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 });
             }
             catch (err: any) {
-                console.log(err)    
-                return res.status(500).json({ error: err.message });
-                
+                console.log(err)
+                return res.status(500).json({status:false, message: err.message });
             }
         }
 
         if (req.method === 'POST') {
             try {
                 const { error } = validateOdd(req.body);
-                if (error) return res.status(400).send(error.details[0].message);
-
+                if (error) return res.status(400).send({status:false, message:error.details[0].message});
                 let oddData = extractOdd(req);
-
                 const bestCalculatedOdds = findBestOdds(oddData?.odds);
-               
-
                 if ('error' in bestCalculatedOdds) {
-                    return res.status(400).send(bestCalculatedOdds.error);
+                    return res.status(400).json({status:false, message:bestCalculatedOdds.error} );
                 }
-
                 oddData = { ...oddData, bestCalculatedOdds } as any;
 
                 const odd = new Odd(oddData);
                 await odd.save();
-               return  res.send(odd);
-            } catch(err:any) {
+                return res.status(200).json({status:true, odd});
+            } catch (err: any) {
                 console.log(err)
-                return res.status(500).json({ error: err.message });
+                return res.status(500).json({ status:false,error: err.message });
             }
         }
 
@@ -90,7 +80,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
     }
 })
 
-function extractOdd(req:any) {
+function extractOdd(req: any) {
     return {
         eventDateTime: req.body.eventDateTime,
         league: req.body.league,

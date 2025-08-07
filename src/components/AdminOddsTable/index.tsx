@@ -12,12 +12,13 @@ import { getCookie } from '@/lib/cookies';
 import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import HandleError from '@/handleError';
 
 const AdminOddsTable = () => {
   const columns = ['Date/Time', 'League', 'Home Team', 'Away Team', 'Bookies', 'Status', 'Actions'];
   const dispatch = useDispatch();
   const oddsFromState = useSelector((state: RootState) => state.fixturesFormState.odds);
-  const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+  const token = getCookie('token');
 
   const [hasMore, setHasMore] = useState(true);
   const [pageNumber, setPageNumber] = useState(2);
@@ -39,7 +40,8 @@ const AdminOddsTable = () => {
       })
       .catch((error: any) => {
         console.error('Error submitting form:', error);
-        toast.error('Something went wrong');
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
         setSaving(false);
       });
   };
@@ -56,6 +58,9 @@ const AdminOddsTable = () => {
           pageNumber,
           pageSize: 100,
           disabled: true
+        },
+        headers: {
+          'x-auth-token': token
         }
       })
       .then((response: { data: { odds: Fixture[] } }) => {
@@ -70,7 +75,8 @@ const AdminOddsTable = () => {
         setSaving(false);
       })
       .catch((error: any) => {
-        console.error('Error fetching offers:', error);
+          toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
         setSaving(false);
       });
   }, [pageNumber]);

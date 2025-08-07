@@ -8,7 +8,7 @@ import { Offer, validateFileInput, validateOffer } from '@/models/offer';
 
 
 // Disable Next.js default body parser (for multer)
- 
+
 // --- Multer setup ---
 const upload = multer({ storage: multer.memoryStorage() });
 const runMiddleware = (req: NextApiRequest, res: NextApiResponse, fn: Function) =>
@@ -25,7 +25,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
         await connectDb();
 
         // Middleware: JWT Authorization (for POST and PUT)
-        if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
+       if (req.method === 'POST' || req.method === 'PUT') {
             await new Promise((resolve, reject) =>
                 authorize(req, res, (result: unknown) => {
                     if (result instanceof Error) return reject(result);
@@ -56,26 +56,26 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
                 }
                 if (originalOrder !== newOrder) {
                     offer.order = newOrder;
-                   await offer.save()
-                     if (newOrder > originalOrder) {
-                            await Offer.updateMany(
-                                {
-                                    order: { $gt: originalOrder, $lte: newOrder },
-                                    _id: { $ne: offer._id },
-                                },
-                                { $inc: { order: -1 } }
-                            )
-                             return res.send('Success');
-                        } else if (newOrder < originalOrder) {
-                            await Offer.updateMany(
-                                {
-                                    order: { $gte: newOrder, $lt: originalOrder },
-                                    _id: { $ne: offer._id },
-                                },
-                                { $inc: { order: 1 } }
-                            )
-                             return res.send('Success');
-                        }
+                    await offer.save()
+                    if (newOrder > originalOrder) {
+                        await Offer.updateMany(
+                            {
+                                order: { $gt: originalOrder, $lte: newOrder },
+                                _id: { $ne: offer._id },
+                            },
+                            { $inc: { order: -1 } }
+                        )
+                        return res.send('Success');
+                    } else if (newOrder < originalOrder) {
+                        await Offer.updateMany(
+                            {
+                                order: { $gte: newOrder, $lt: originalOrder },
+                                _id: { $ne: offer._id },
+                            },
+                            { $inc: { order: 1 } }
+                        )
+                        return res.send('Success');
+                    }
                 }
             } catch (error: any) {
                 console.error('Error saving offer:', error);
@@ -90,5 +90,5 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 })
 
 
- 
+
 

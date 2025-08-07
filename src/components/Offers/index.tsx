@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
 import TabCard, { Offer } from '../TabCards';
-import { removeCookie } from '@/lib/cookies';
+import { getCookie, removeCookie } from '@/lib/cookies';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Footer from '@/components/Footer/index';
 import { findItemByKey } from '@/lib/utils';
+import { toast } from 'react-toastify';
+import HandleError from '@/handleError';
 interface OffersProps {
   initialOffers: Offer[];
 }
@@ -21,27 +23,35 @@ const Offers = ({ initialOffers }: OffersProps) => {
   const loadMoreOffers = () => {
     setPageNumber(pageNumber + 1);
   };
-
+  const token = getCookie('token');
   useEffect(() => {
-    if (pageNumber > 1)
+    // if (pageNumber > 1)
       axios
-        .get(`${API_ENDPOINT}/offers`, {
+        .get(`${API_ENDPOINT}/offers/frontend`, {
           params: {
             pageNumber,
             pageSize
-          }
+          },
+          // headers: {
+          //   'x-auth-token': token    }
         })
-        .then((response: { data: { offers: Offer[] } }) => {
-          const newOffers = response?.data?.offers;
-
-          if (newOffers.length === 0) {
-            setHasMore(false);
+        .then((response: { data: any }) => {
+          if (response.data.status == true) {
+            const newOffers = response?.data?.offers;
+            if (newOffers.length === 0) {
+              setHasMore(false);
+            } else {
+              setOffers([...offers, ...newOffers] as any);
+            }
           } else {
-            setOffers([...offers, ...newOffers] as any);
+           toast.error(response.data.message)
           }
+
         })
         .catch((error: any) => {
           console.error('Error fetching offers:', error);
+          toast.error(error?.response?.data?.message || 'Something went wrong');
+          // HandleError(error);
         });
   }, [pageNumber]);
 
@@ -56,7 +66,9 @@ const Offers = ({ initialOffers }: OffersProps) => {
         setFooters(footers);
       })
       .catch((error: any) => {
-        console.log('Odds error: ', error);
+       
+         toast.error(error?.response?.data?.message || 'Something went wrong');
+        // HandleError(error);
       });
     let blogs = [];
     try {
@@ -68,7 +80,7 @@ const Offers = ({ initialOffers }: OffersProps) => {
     }
   }, []);
 
-  const item = findItemByKey(footers, 'name', 'Bookies Footer');
+  const item = findItemByKey(footers, 'name', 'Bookies footer');
   const itemAllFooters = findItemByKey(footers, 'name', 'Set All Footers');
 
   return (

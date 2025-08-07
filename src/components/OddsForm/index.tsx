@@ -14,6 +14,7 @@ import ConfirmationPopup from '../ConfirmationPopup';
 import { getCookie } from '@/lib/cookies';
 import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
+import HandleError from '@/handleError';
 interface OddsFormProps {
   setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -50,7 +51,7 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
   const editId = useSelector((state: RootState) => state.fixturesFormState.editId);
   const bookies = useSelector((state: RootState) => state.bookiesState.bookies);
   const bookieNames = Object.keys(bookies);
-  const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+  const token = getCookie('token');
   const headers = {
     'x-auth-token': token
   };
@@ -83,31 +84,46 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
     setSaving(true);
     if (editId) {
       try {
-        const { data: updatedOdd } = await axios.put(`${API_ENDPOINT}/odds/${editId}`, { ...odd }, { headers });
+        const response = await axios.put(`${API_ENDPOINT}/odds/${editId}`, { ...odd }, { headers });
+        console.log('resp:- '+JSON.stringify(response));
+        if(response?.data?.status){
+          const updatedOdd = response?.data?.updatedOdd
         const index = oddsCopy.findIndex((item) => item._id === editId);
         oddsCopy.splice(index, 1, updatedOdd);
         dispatch(setOdds(oddsCopy));
         toast.success('Updated');
         resetState();
-      } catch (error) {
-        toast.error('Something went wrong');
-        console.log('Odds error: ', error);
+        }else{
+          toast.error(response?.data?.message)
+        }
+
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
         setSaving(false);
       }
     } else {
       try {
-        const { data: newOdd } = await axios.post(`${API_ENDPOINT}/odds`, { ...odd }, { headers });
-        oddsCopy.push(newOdd);
-        dispatch(setOdds(oddsCopy));
-        toast.success('Added');
-        resetState();
+        const response = await axios.post(`${API_ENDPOINT}/odds`, { ...odd }, { headers });
+        if (response?.data?.status) {
+          const newOdd = response?.data?.odd
+          oddsCopy.push(newOdd);
+          dispatch(setOdds(oddsCopy));
+          toast.success('Added');
+          resetState();
+        }
+        else {
+          toast.error(response?.data?.message)
+        }
       } catch (error: any) {
-        toast.error('Something went wrong');
-        console.log('Odds error: ', error);
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        HandleError(error);
         setSaving(false);
       }
     }
   };
+
+
 
   useEffect(() => {
     if (editId) {
@@ -117,11 +133,11 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
     }
   }, [editId]);
 
-  useEffect(() => {
-    for (const bookie in values.odds) {
-      if (!values.odds[bookie].suspended) setFieldValue('suspendAll', false);
-    }
-  }, [values.odds]);
+  // useEffect(() => {
+  //   for (const bookie in values.odds) {
+  //     if (!values.odds[bookie].suspended) setFieldValue('suspendAll', false);
+  //   }
+  // }, [values.odds]);
 
   const handleDateTimeChange = (event: React.ChangeEvent<any>) => {
     const localDate = new Date(event.target.value);
@@ -150,8 +166,10 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
         dispatch(setOdds(filteredOdds));
         toast.success('Odd deleted');
         resetState();
-      } catch (error) {
+      } catch (error: any) {
         toast.error('Something went wrong');
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        // HandleError(error);
         console.log('Odds error: ', error);
         setSaving(false);
       }
@@ -165,6 +183,10 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
       setFieldValue(`odds.${bookieName}.suspended`, e.target.checked);
     });
   };
+
+
+  console.log('OddsForm rendered', values);
+  console.log('OddsForm values.suspendAll', values.suspendAll);
 
   return (
     <div className="form-container">
@@ -228,7 +250,7 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
                 value={values.odds[bookieName]?.oneX?.awayWin}
                 onChange={handleChange}
               />
-              <ToggleSwitch id={`odds.${bookieName}.suspended`} name={`odds.${bookieName}.suspended`} checked={values.odds[bookieName].suspended} onChange={(e: any) => handleChange(e)} />
+              <ToggleSwitch type={'odds'} id={`${editId}`} name={`odds.${bookieName}.suspended`} checked={!values.odds[bookieName].suspended} odds={odds} onChange={(e: any) => handleChange(e)} />
             </div>
           </div>
         ))}
@@ -237,7 +259,7 @@ const OddsForm = ({ setShowForm }: OddsFormProps) => {
       <div className="delete-section">
         <div className="suspend-toggle">
           <div className="label">All Live/Suspend</div>
-          <ToggleSwitch id="suspendAll" name="suspendAll" checked={values.suspendAll} onChange={handleSuspendAllChange} />
+          <ToggleSwitch id={`${editId}`} type={'odds'} name="suspendAll" checked={values.suspendAll} odds={odds}  onChange={handleSuspendAllChange} />
         </div>
         <div className="delete-event" onClick={() => setShowPopup(true)}>
           <span className="label">Delete Event</span>

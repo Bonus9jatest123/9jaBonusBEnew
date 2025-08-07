@@ -9,13 +9,13 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import dynamic from 'next/dynamic';
-import { Offer } from '@/components/TabCards/index';
 import ImageUploader from '@/components/ImageUploader';
+import HandleError from '@/handleError';
 const ReactQuill = dynamic(() => import('react-quill'), {
   ssr: false
 });
 
-const token = getCookie('token') && JSON.parse(getCookie('token') as any);
+const token = getCookie('token');
 
 const FooterForm = (props: any) => {
   const headers = {
@@ -57,7 +57,9 @@ const FooterForm = (props: any) => {
   useEffect(() => {
     if (formId) {
       axios
-        .get(`${API_ENDPOINT}/footer/${formId}`, { headers })
+        .get(`${API_ENDPOINT}/footer/${formId}`
+          , { headers }
+        )
         .then((response: { data: any }) => {
           setInitialValues((prev) => {
             return {
@@ -96,6 +98,8 @@ const FooterForm = (props: any) => {
         })
         .catch((error: any) => {
           console.error('Error fetching offers:', error);
+            toast.error(error?.response?.data?.message || 'Something went wrong');
+            HandleError(error);
         });
     }
   }, [formId]);
@@ -169,16 +173,20 @@ const FooterForm = (props: any) => {
     
     axios
       .put(`${API_ENDPOINT}/footer/${formId}`, formData, { headers })
-      .then((response: { data: Offer }) => {
-        toast.success('Update data successfully');
+      .then((response: any) => {
+       if(response.data.status==true){
+        toast.success(response?.data.message)
+       }else{
+        toast.success(response?.data.message)
+       }
       })
       .catch((error: any) => {
         console.error('Error submitting form:', error);
-        toast.error('Something went wrong');
+        toast.error(error.response.data.message);
         // resetStates();
       });
   };
-console.log(values.accordianSections, "values.accordianSections")
+
   const handleAddAccordianSection = () => {
     setFieldValue('accordianSections', [...(values.accordianSections || []), { title: '', expandedText: '' }]);
   };

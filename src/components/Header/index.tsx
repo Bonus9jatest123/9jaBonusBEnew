@@ -1,70 +1,98 @@
 'use client';
-import { getCookie, removeCookie } from '@/lib/cookies';
+import { getCookie, removeCookie, removeUserCookie } from '@/lib/cookies';
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { hasPermission } from '@/redux/hasPermissions';
+import { RootState } from '@/redux/store';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const Header = () => {
   const { push } = useRouter();
   const pathname = usePathname();
   const [token, setToken] = useState<string | null>(null);
+  const currentState = useSelector((state: RootState) => state);
 
   useEffect(() => {
     const cookie = getCookie('token');
+
     if (cookie) {
       try {
-        setToken(JSON.parse(cookie));
+        setToken(cookie);
       } catch (e) {
         console.error('Invalid cookie format');
       }
     }
-  }, []);
-
+  }, [pathname]);
   const handleLogout = () => {
     removeCookie('token');
-    setToken(null); // Update UI after logout
-    push('/admin/login');
+    removeUserCookie('user');
+    setToken(null);
+    setTimeout(() => {
+      toast.success('Logged out successfully');
+      push('/admin/login');
+    }, 500)
+
   };
-
-  // Optional: skip rendering until cookie is checked
-  if (token === null && typeof window !== 'undefined') {
-    // Optionally return null, loader, or just render unauthenticated menu
-  }
-
   return (
     <div className="admin-nav">
       <div className="wrapper">
         <div className="admin-nav-content">
-          <Link href="/admin/offers" className="admin-logo">
+          {hasPermission('Bookies', currentState) ? <Link href="/admin/offers" className="admin-logo">
             Back Office
-          </Link>
+          </Link> : <div className="admin-logo">
+            Back Office
+          </div>}
+
           <div className="nav-links">
             {token ? (
               <>
-                <Link href="/admin/offers" className={pathname === '/admin/offers' ? 'link-item --active' : 'link-item'}>
+                {hasPermission('Bookies', currentState) && <Link href="/admin/offers" className={pathname === '/admin/offers' ? 'link-item --active' : 'link-item'}>
                   Bookies
-                </Link>
-                <Link href="/admin/odds" className={pathname === '/admin/odds' ? 'link-item --active' : 'link-item'}>
+                </Link>}
+                {hasPermission('Odds', currentState) && <Link href="/admin/odds" className={pathname === '/admin/odds' ? 'link-item --active' : 'link-item'}>
                   Odds
-                </Link>
-                <Link href="/admin/footer" className={pathname === '/admin/footer' ? 'link-item --active' : 'link-item'}>
+                </Link>}
+                {hasPermission('Users', currentState) && <Link href="/admin/users" className={pathname === '/admin/users' ? 'link-item --active' : 'link-item'}>
+                  Users
+                </Link>}
+                {hasPermission('Footers', currentState) && <Link href="/admin/footer" className={pathname === '/admin/footer' ? 'link-item --active' : 'link-item'}>
                   Footer
-                </Link>
+                </Link>}
+
                 <div className="auth-links">
                   <div className="link-item" onClick={handleLogout}>
                     Logout
                   </div>
+                  <Link href="/admin/change-password" className={pathname === '/admin/change-password' ? 'link-item --active' : 'link-item'}>
+                    Change Password
+                  </Link>
+
                 </div>
+
               </>
             ) : (
-              <div className="auth-links">
+               pathname?.startsWith('/admin/reset-password')?(
+ <div className="auth-links">
+             
+                <Link href="/admin/login" className={pathname === '/admin/login' ? 'link-item --active' : 'link-item'}>
+                  Log In
+                </Link>
+                 
+              </div>
+               ):( <div className="auth-links">
                 <Link href="/admin/signup" className={pathname === '/admin/signup' ? 'link-item --active' : 'link-item'}>
                   Sign Up
                 </Link>
                 <Link href="/admin/login" className={pathname === '/admin/login' ? 'link-item --active' : 'link-item'}>
                   Log In
                 </Link>
-              </div>
+                 <Link href="/admin/verify-email" className={pathname === '/admin/verify-email' ? 'link-item --active' : 'link-item'}>
+                  Reset Password
+                </Link>
+              </div>)
+             
             )}
           </div>
         </div>

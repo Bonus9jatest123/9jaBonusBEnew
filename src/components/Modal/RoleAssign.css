@@ -1,0 +1,105 @@
+/* Backdrop */
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal container */
+.custom-modal {
+  background: #fff;
+  width: 420px;
+  max-width: 90%;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  animation: fadeIn 0.3s ease-in-out;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Title */
+.custom-modal-title {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+}
+
+/* Permission checkboxes */
+.custom-modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  color: #444;
+}
+
+.checkbox-label input[type="checkbox"] {
+  accent-color: #007bff;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Footer buttons */
+.custom-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn.cancel {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.btn.cancel:hover {
+  background-color: #ddd;
+}
+
+.btn.assign {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn.assign:hover {
+  background-color: #0056b3;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

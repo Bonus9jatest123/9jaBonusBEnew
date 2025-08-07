@@ -1,39 +1,19 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
+import { User } from '@/models/user';
+import { connectDb } from '@/lib/startup/connectDb';
+import { NextApiRequest, NextApiResponse } from 'next';
+import cookie from 'cookie';
 
 interface JwtPayload {
-  _id: string,
-  name: string,
-  email: string,
-  // Extend this as needed: email, role, etc.
+  id: string;
+  name: string;
+  email: string;
   [key: string]: any;
 }
 
-// Extend the request to attach `user`
 export interface AuthenticatedRequest extends NextApiRequest {
   user?: JwtPayload;
 }
-
-// export function authorize(handler: (req: AuthenticatedRequest, res: NextApiResponse) => Promise<void>) {
-//   return async (req: NextApiRequest, res: NextApiResponse) => {
-//     const token = req.headers['x-auth-token'] as string | undefined;
-
-//     if (!token) {
-//       return res.status(401).json({ message: 'Access denied. No token provided.' });
-//     }
-
-//     try {
-//       const decoded = jwt.verify(token, process.env.JWT_KEY as string) as JwtPayload;
-//       (req as AuthenticatedRequest).user = decoded;
-//       return handler(req as AuthenticatedRequest, res);
-//     } catch (err) {
-//       return res.status(401).json({ message: 'Invalid token' });
-//     }
-//   };
-// }
-
-
- 
 
 export async function authorize(
   req: AuthenticatedRequest,
@@ -41,41 +21,35 @@ export async function authorize(
   next: (err?: any) => void
 ) {
   const token = req.headers['x-auth-token'] as string | undefined;
+  //   const cookies = cookie.parse(req.headers.cookie || '');
+  // const token = cookies.token;
+   
 
   if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
+    return res.status(401).json({status:false, message:'Access denied. No token provided.' });
   }
+
+  await connectDb();
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_KEY as string) as JwtPayload;
-
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({status:false, message:'User not found' });
+    }
+    if (user.auth_token !== token) {
+      return res.status(401).json({status:false, message:'Invalid or expired token.Please login again.' });
+    }
     req.user = decoded;
     next();
-    
-  } catch (err) {
-    console.log(err, 'errorr')
-    return res.status(401).json({ message: 'Invalid token' });
+
+  } catch (err: any) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({status:false, message: 'Invalid or expired token. Please login again.' });
+    }
+
+    console.error('Auth error:', err);
+    return res.status(401).json({status:false, message: 'Invalid or expired token. Please login again.' });
   }
 }
-
-
-
-// export function authorize(req: NextApiRequest, res: NextApiResponse, next: Function) {
-//   const token = req.headers['x-auth-token'] as string | undefined;
-
-//   if (!token) {
-//     res.status(401).json({ error: 'Unauthorized' });
-//     return;
-//   }
-
-//   try {
-//    const decoded = jwt.verify(token, process.env.JWT_KEY as string) as JwtPayload;
-//     (req as AuthenticatedRequest).user = decoded;
-//       return handler(req as AuthenticatedRequest, res);
-
-//     next(); // continue
-//   } catch (error) {
-//     res.status(401).json({ error: 'Invalid token' });
-//   }
-// }
-

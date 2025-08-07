@@ -46,3 +46,14 @@ export interface bookieInfo {
 }
 
 export type bookie = Record<string, bookieInfo>;
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  permission: string[];
+  status: number;
+  createdAt: string;
+  role : number 
+}
+

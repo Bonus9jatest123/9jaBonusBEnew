@@ -12,6 +12,9 @@ import Footer from '../Footer/index';
 import axios from 'axios';
 import { API_ENDPOINT } from '@/lib/constants';
 import { findItemByKey } from '@/lib/utils';
+import { toast } from 'react-toastify';
+import HandleError from '@/handleError';
+import { getCookie } from '@/lib/cookies';
 
 const BetsSection = () => {
   const dispatch = useDispatch();
@@ -31,10 +34,16 @@ const BetsSection = () => {
   const leagueDefaultValue = { label: currentFilters.league === '*' ? 'All' : currentFilters.league, value: currentFilters.league };
 
   const [footers, setFooters] = useState([]);
+  const token = getCookie('token');
+  const headers = { 'x-auth-token': token };
 
   useEffect(() => {
     axios
-      .get(`${API_ENDPOINT}/footer/footers`)
+      .get(`${API_ENDPOINT}/footer/footers`
+      //   , {
+      //   headers: headers
+      // }
+    )
       .then((response: { data: any }) => {
         const footers = response?.data;
         //  dispatch(setOdds(odds));
@@ -42,16 +51,20 @@ const BetsSection = () => {
       })
       .catch((error: any) => {
         console.log('Odds error: ', error);
+        // toast.error(error?.response?.data?.message || 'Something went wrong');
+        // HandleError(error);
       });
     let blogs = [];
     try {
       const blogsRaw = localStorage.getItem('blogs');
       blogs = blogsRaw ? JSON.parse(blogsRaw) : [];
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Something went wrong');
+      // HandleError(err);
       // console.error('Failed to parse blogs:', err);
       blogs = [];
     }
-    
+
 
   }, []);
 
