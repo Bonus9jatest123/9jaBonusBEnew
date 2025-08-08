@@ -1,6 +1,6 @@
 // pages/api/auth/register.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { User, validateUser, UserStatus, RoleStatus } from '@/models/user'; // Adjust path based on your structure
 import { connectDb } from '@/lib/startup/connectDb';
 import { withCors } from '@/middleware/cors';

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Joi from 'joi';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { User } from '@/models/user';
 import { connectDb } from '@/lib/startup/connectDb';
 import { withCors } from '@/middleware/cors';

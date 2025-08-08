@@ -44,7 +44,7 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
 
     try {
       await transporter.sendMail({
-        from: `"Your App" <${process.env.EMAIL_USER}>`,
+        from: `"Your App" <${process.env.FROM_USER}>`,
         to: email,
         subject: 'Password Reset',
         html: htmlTemplate,

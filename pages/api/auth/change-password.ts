@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import Joi from 'joi';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs'; // changed from 'bcrypt'
 import { User } from '@/models/user';
 import { connectDb } from '@/lib/startup/connectDb';
 import { withCors } from '@/middleware/cors';
@@ -23,22 +23,29 @@ export default withCors(async function handler(req: NextApiRequest, res: NextApi
     );
 
     const { error } = validateChangePassword(req.body);
-    if (error) return res.status(400).json({ status: false, message: error.details[0].message });
+    if (error) {
+      return res.status(400).json({ status: false, message: error.details[0].message });
+    }
 
-    const {password, confirmPassword } = req.body;
+    const { password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ status: false, message: 'New password and confirm password must match.' });
+      return res.status(400).json({
+        status: false,
+        message: 'New password and confirm password must match.',
+      });
     }
 
     const userId = (req as any).user.id;
-   
     const user = await User.findById(userId);
 
-    if (!user) return res.status(404).json({ status: false, message: 'User not found.' });
+    if (!user) {
+      return res.status(404).json({ status: false, message: 'User not found.' });
+    }
 
-    const hashedpassword = await bcrypt.hash(password, 10);
-    user.password = hashedpassword;
+    // bcryptjs usage - works the same as bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
     await user.save();
 
     return res.status(200).json({ status: true, message: 'Password changed successfully.' });
